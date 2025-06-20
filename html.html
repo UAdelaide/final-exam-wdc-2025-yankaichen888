@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dog of the Day</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: Comic Sans MS, cursive;
+      background-color: #ffccff;
+      animation: flash 0.5s infinite;
+    }
+    @keyframes flash {
+      0% { background-color: #ffccff; }
+      50% { background-color: #ccffcc; }
+      100% { background-color: #ffccff; }
+    }
+    .dog-image {
+      margin-top: 1000px;
+      width: 300px;
+      border: 10px dashed red;
+    }
+    button {
+      font-size: 30px;
+      padding: 20px;
+      background: lime;
+    }
+   
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>🐶 Welcome to Dog World!!! 🐶</h1>
+    <p>Click the super hidden button to reveal the dog!!!</p>
+    <button @click="loadDog">SHOW ME DOG</button>
+    <img v-if="dogImage" :src="dogImage" class="dog-image">
+    <p v-if="dogImage">This is a random dog for your joy. It has no alt text. 🤷</p>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          dogImage: ''
+        };
+      },
+      methods: {
+        loadDog() {
+          fetch('https://dog.ceo/api/breeds/image/random')
+            .then(res => res.json())
+            .then(data => {
+              this.dogImage = data.message;
+              // Scroll to bottom (increasing kinematic load)
+              window.scrollTo(0, document.body.scrollHeight);
+            });
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
