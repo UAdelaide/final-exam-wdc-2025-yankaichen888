@@ -91,3 +91,17 @@ let db;
     console.error('Error setting up database. Ensure Mysql is running: service mysql start', err);
   }
 })();
+
+
+app.get('/api/dogs', async function (req, res) {
+  try {
+    const query = 'select Users.username as owner_username, Dogs.name as dog_name, Dogs.size from Dogs left join Users on Dogs.owner_id = Users.user_id';
+    const [rows] = await db.query(query);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'not found' });
+    }
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: e.toString()});
+  }
+});
