@@ -11,10 +11,25 @@
 
   <div id="app" class="container py-5">
     <h1 class="mb-4 text-primary">{{ message }}</h1>
-    <p class="lead">Connect with trusted walkers for your beloved dog!</p>
 
-    <a href="owner-dashboard.html" class="btn btn-outline-primary me-2">Owner Dashboard</a>
-    <a href="walker-dashboard.html" class="btn btn-outline-success">Walker Dashboard</a>
+
+<!--    <div v-if="isLoggedIn">-->
+<!--      <p class="lead">Connect with trusted walkers for your beloved dog!</p>-->
+
+<!--      <a href="owner-dashboard.html" class="btn btn-outline-primary me-2">Owner Dashboard</a>-->
+<!--      <a href="walker-dashboard.html" class="btn btn-outline-success">Walker Dashboard</a>-->
+<!--    </div>-->
+    <form @submit.prevent="handleSubmit">
+      <div class="mb-4">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" v-model="username" class="form-control" id="username">
+      </div>
+      <div class="mb-4">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" v-model="password" class="form-control" id="password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-login">Log In</button>
+    </form>
   </div>
 
   <script>
@@ -22,8 +37,39 @@
     createApp({
       data() {
         return {
+          username: '',
+          password: '',
           message: 'Welcome to the Dog Walking Service!'
         };
+      },
+      methods: {
+        handleSubmit()
+        {
+          if (this.username.trim() && this.password.trim()) {
+            fetch('/api/users/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                username: this.username,
+                password: this.password
+              })
+            }).then(
+              response => response.json()
+            ).then(data => {
+              if (data.message && data.message === 'Login successful') {
+                if (data.user.role === 'owner') {
+                  window.location.replace('/owner-dashboard.html');
+                } else if (data.user.role === 'walker') {
+                  window.location.replace('/walker-dashboard.html');
+                }
+              }
+            }).catch(err => {
+              console.log(err);
+            })
+          }
+        },
       }
     }).mount('#app');
   </script>
