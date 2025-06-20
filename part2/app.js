@@ -1,8 +1,10 @@
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
+app.use(session({secret:'112231'}));
 
 // Middleware
 app.use(express.json());
