@@ -123,3 +123,27 @@ app.get('/api/walkrequests/open', async function (req, res) {
     res.status(500).json({ error: e.toString()});
   }
 });
+
+
+
+app.get('/api/walkers/summary', async function (req, res) {
+  try {
+    const query = `select Walker.username as walker_username, sum(WalkRatings.rating) as total_ratings, avg(WalkRatings.rating) as average_rating, count(WalkRequests.request_id) as completed_walks
+    from (select user_id, username from Users where role = 'walker') Walker
+    left join WalkRatings on Walker.user_id = WalkRatings.walker_id
+    left join WalkApplications on Walker.user_id = WalkApplications.walker_id and WalkApplications.status = 'accepted'
+    left join WalkRequests on WalkApplications.request_id = WalkRequests.request_id and WalkRequests.status = 'completed'
+    GROUP BY Walker.user_id`;
+    const [rows] = await db.query(query);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'not found' });
+    }
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: e.toString()});
+  }
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+module.exports = app;
