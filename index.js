@@ -105,3 +105,21 @@ app.get('/api/dogs', async function (req, res) {
     res.status(500).json({ error: e.toString()});
   }
 });
+
+
+app.get('/api/walkrequests/open', async function (req, res) {
+  try {
+    const query = `select WalkRequests.request_id, Dogs.name as dog_name, WalkRequests.requested_time, WalkRequests.duration_minutes, WalkRequests.location, Users.username as owner_username
+    from WalkRequests 
+    left join Dogs on WalkRequests.dog_id = Dogs.dog_id 
+    left join Users on Dogs.owner_id = Users.user_id 
+    where WalkRequests.status = 'open'`;
+    const [rows] = await db.query(query);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'not found' });
+    }
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: e.toString()});
+  }
+});
