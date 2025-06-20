@@ -5,7 +5,6 @@ const mysql = require('mysql2/promise')
 const database = mysql.createPool({
   host: '127.0.0.1', 
   user: 'root', 
-  password: '123456', 
   database: 'DogWalkService', 
 })
 
