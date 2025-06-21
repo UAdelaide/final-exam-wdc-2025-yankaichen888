@@ -57,4 +57,30 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.get('/myDogs', async function (req, res) {
+
+  try {
+    const [rows] = await db.query(`
+      SELECT dog_id, name FROM Dogs
+      WHERE owner_id = ?
+    `, [req.session.user.user_id]);
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    res.json({ message: 'get dogs successful', dogs: rows });
+  } catch (error) {
+    res.status(500).json({ error: error.toString()});
+  }
+})
+
+router.get('/logout', async function (req, res) {
+
+  try {
+    delete req.session.user;
+    res.json({ message: 'logout success' });
+  } catch (error) {
+    res.status(500).json({ error: error.toString()});
+  }
+})
+
 module.exports = router;
