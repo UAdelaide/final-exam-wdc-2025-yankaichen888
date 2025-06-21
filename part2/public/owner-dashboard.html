@@ -9,11 +9,10 @@
 </head>
 <body class="bg-light">
   <div id="app" class="container py-4">
-    <h1 class="mb-4 text-primary">Owner Dashboard</h1>
+      <div class="d-flex justify-content-between">
     <h1 class="mb-4 text-primary">Owner Dashboard</h1>
       <button type="button" class="btn btn-outline-danger" @click="logout">Log Out</button>
-    </div>
-
+      </div>
     <!-- Walk request form -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white">
@@ -22,8 +21,13 @@
       <div class="card-body">
         <form @submit.prevent="submitWalkRequest">
           <div class="mb-3">
-            <label class="form-label">Dog ID</label>
-            <input v-model="form.dog_id" type="number" class="form-control" required>
+<!--            <label class="form-label">Dog ID</label>-->
+<!--            <input v-model="form.dog_id" type="number" class="form-control" required>-->
+            <label for="dogSelect" class="form-label">Select Your Dog</label>
+            <select class="form-select" id="dogSelect" v-model="form.dog_id">
+              <option value="0" selected>-- Choose a dog --</option>
+                <option v-for="dog in myDogs" :key="dog.dog_id" :value="dog.dog_id">{{dog.name}}</option>
+            </select>
           </div>
           <div class="mb-3">
             <label class="form-label">Requested Date & Time</label>
@@ -73,16 +77,24 @@
     createApp({
       setup() {
         const form = ref({
-          dog_id: '',
+          dog_id: '0',
           requested_time: '',
           duration_minutes: '',
           location: ''
         });
+        const myDogs = ref([]);
 
         const walks = ref([]);
         const message = ref('');
         const error = ref('');
 
+        async function logout() {
+            const res = await fetch('/api/users/logout');
+            const result = await res.json();
+            if (result.message === 'logout success') {
+                window.location.replace('/');
+            }
+        }
         async function loadWalks() {
           try {
             const res = await fetch('/api/walks');
@@ -92,6 +104,18 @@
           }
         }
 
+        async function loadMyDogs() {
+            try {
+                const res = await fetch('/api/users/myDogs');
+                const result = await res.json();
+                myDogs.value = result.dogs;
+                console.log(result.dogs)
+            } catch (err) {
+                error.value = err.message;
+                message.value = '';
+            }
+        }
+
         async function submitWalkRequest() {
           try {
             const res = await fetch('/api/walks', {
@@ -99,14 +123,6 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(form.value)
             });
-
-        async function logout() {
-            const res = await fetch('/api/users/logout');
-            const result = await res.json();
-            if (result.message === 'logout success') {
-                window.location.replace('/');
-            }
-        }
             const result = await res.json();
 
             if (!res.ok) throw new Error(result.error || 'Error submitting walk request');
@@ -128,10 +144,12 @@
 
         onMounted(() => {
           loadWalks();
+          loadMyDogs()
         });
 
         return {
-           logout,
+            logout,
+          myDogs,
           form,
           walks,
           message,
